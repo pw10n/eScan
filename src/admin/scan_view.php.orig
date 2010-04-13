@@ -1,0 +1,66 @@
+<?php
+function scan_view($args){
+?>
+<html>
+<head>
+<title>eWeek: Scan Barcode</title>
+<script type="text/javascript">
+
+
+function process_scan(){
+   if (window.XMLHttpRequest){
+      // IE7+, FF, Chrome, Opera, Safari
+      xmlhttp = new XMLHttpRequest();
+   }
+   else{
+      xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+   }
+
+   xmlhttp.onreadystatechange=function(){
+      if(xmlhttp.readyState == 4){
+         response_json = JSON.parse(xmlhttp.responseText);
+         statcode = Number(response_json['state']);
+         if ( 0 == statcode ){
+            // RED
+            document.getElementById('result').innerHTML = "<h1>Invalid Passport</h1>";
+         }
+         else if ( 1 == statcode ){
+            // YELLOW
+            document.getElementById('result').innerHTML = "<h1>Success.  Please register your passport.</h1>";
+         }
+         else if ( 2 == statcode ){
+            document.getElementById('result').innerHTML = "<h1> Welcome " + response_json['name'] + "! </h1>";
+         }
+         else{
+            document.getElementById('result').innerHTML = statcode;
+         }
+      } 
+   }
+
+   bid = document.getElementById('barcode').value;
+   eid = document.getElementById('eventid').value;
+   document.getElementById('barcode').value = "";
+
+   xmlhttp.open("GET","controller.php?state=xhr_process_scan&bid="+bid+"&eid="+eid,true);
+
+   xmlhttp.send(null);
+}
+</script>
+</head>
+<body>
+
+<div id="scanbox"> 
+<form name="scanfrm" action="javascript:process_scan()">
+<input type="hidden" name="event" id="event" />
+<input type="text" name="barcode" id="barcode" />
+</form>
+</div>
+
+<div id="result"> </div>
+
+</body>
+
+</html>
+<?PHP
+}
+?>

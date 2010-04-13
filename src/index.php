@@ -1,0 +1,4 @@
+<?PHP
+header("Location: user");
+?>
+

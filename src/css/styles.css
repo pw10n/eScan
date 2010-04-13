@@ -1,0 +1,190 @@
+@charset "utf-8";
+/* CSS Document */
+
+body {
+	background-color: #25AAE1;
+}
+
+h1 {
+	color: #FFFFFF;
+	font-size: 1.6em;
+	font-family: Arial, Helvetica, sans-serif;
+	font-weight: bold;
+}
+
+h2 {
+	color: #FFFFFF;
+	font-size: 1.3em;
+	font-family: Arial, Helvetica, sans-serif;
+	font-weight: bold;
+}
+
+#wrapper {
+	width: 1000px;
+	border: none;
+	margin: 0px auto 0px auto;
+}
+
+#header {
+	width: 1000px;
+	height: 200px;
+	border: none;
+	margin: 0px auto 0px auto;
+}
+
+/** Passport Login Page **/
+
+.login {
+	width: 400px;
+	height: 200px;
+	border: dashed #FCB040 4px;
+	margin: 0px auto 0px auto;
+}
+
+.login_fieldset {
+	margin: 0px auto 0px auto;
+	border: 0px;
+}
+
+.login_label {
+	width: 125px;
+	float: left;
+	text-align: right;
+	margin-right: 20px;
+	display: block;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #FFF;
+}
+
+.login_input {
+	color: #781351;
+	background: #fee3ad;
+	border: 1px solid #781351;
+}
+
+.login_submit {
+	margin-left: 145px;
+	color: #000;
+	font-family: Arial, Helvetica, sans-serif;
+	background: #FCB040;
+	border: 2px outset #d7b9c9;
+}
+
+.login_fail {
+	margin-left: 95px;
+	color: #FF0000;
+	font-family: Arial, Helvetica, sans-serif;
+	font-weight: bold;
+}
+
+/** Passport Registration Page **/
+
+.registration {
+	width: 500px;
+	height: 350px;
+	border: dashed #FCB040 4px;
+	margin: 0px auto 0px auto;
+}
+
+.reg_barcode {
+	margin-left: 145px;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #FFFFFF;
+}
+
+.reg_opt {
+	margin-left: 65px;
+	color: #FFFFFF;
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+/** Passport Stats Pages **/
+
+.stats {
+	width: 1000px;
+	border: none;
+	margin: 0px auto 0px auto;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 1.0em;
+	color: #FFFFFF;
+}
+
+.stats_note {
+	width: 1000px;
+	background-color: #fee3ad;
+	border: double 3px #781351;
+	margin: 5px auto 0px auto;
+	font-size: 1.0em;
+	color: #781351;
+	padding: 10px;
+}
+
+.stats_table {
+	color: #781351;
+	background: #F9F5ED;
+	border: 1px solid #781351;
+	border-collapse: collapse;
+
+}
+
+.stats_submit {
+	color: #000;
+	font-family: Arial, Helvetica, sans-serif;
+	background: #FCB040;
+	border: 2px outset #d7b9c9;
+
+}
+
+/** Passport Leaderboard Page **/
+
+.leaderboard {
+	width: 500px;
+	border: none;
+	margin: 0px auto 0px auto;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 1.0em;
+	color: #FFFFFF;
+}
+
+/** Passport Team Registration Page **/
+
+.team_reg_add {
+	width: 1000px;
+	border: none;
+	margin: 0px auto 0px auto;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 1.0em;
+	color: #FFFFFF;
+}
+
+/** Passport Team Creation Page **/
+
+.ortext {
+	margin-left: 170px;
+	color: #FFFFFF;
+	font-family:Arial, Helvetica, sans-serif;
+}
+
+/** Extra Styles **/
+
+a.golink {
+	color: #FCB040;
+	text-decoration: none;
+}
+
+a:hover.golink {
+	color: #FCB040;
+	text-decoration: underline;
+}
+
+li {
+	margin-left: 25px;
+}
+
+.left {
+	float: left;
+}
+
+.right {
+	float: right;
+}

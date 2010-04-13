@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" media="all" href="../css/reset.css" />
+<link rel="stylesheet" type="text/css" media="all" href="../css/styles.css" />
+<link type="image/x-icon" rel="shortcut icon" href="../images/favicon.ico"/>
+<title>eWeek Passport Statistics</title>
+</head>
+
+<body>
+
+<div id="wrapper">
+	<div id="header">
+    	<div class="left">
+        	<img src="../images/eweek_logo.png" alt="eWeek 2010" border="0" />
+        </div>
+        <div class="left">
+        	<img src="../images/bg.png" alt="" border="0" />
+        </div>
+    </div>
+
+    <h1>eWeek Passport Statistics</h1>
+
+    <br />
+    
+    <div class="stats">
+    
+		<?PHP
+        $is_registered_for_team = false;
+        $is_team_captain = false;
+        
+        if (isset($args["team"]) && strcmp($args["team"]["cid"], $args["uid"]) == 0) {
+          $is_team_captain = true;
+        }
+        
+        if (isset($args["registration"]) && $args["registration"]["tid"] != -1) {
+          $is_registered_for_team = true;
+        }
+        
+        $eligible_for = NULL;
+        $next_prize = NULL;
+        $events_needed = 0;
+        
+        foreach ($args["prizeLevels"] as $num_events => $prize) {
+          if ($next_prize == NULL) {
+            $next_prize = $prize;
+            $events_needed = $num_events - $args["registration"]["evts"];
+          }
+          
+          if ($args["registration"]["evts"] >= $num_events) {
+            $eligible_for = $prize;
+            $next_prize = NULL;
+          }
+        }
+        
+        ?>
+        
+        <?PHP
+        if (isset($args["justRegistered"]) && $args["justRegistered"]) {
+        ?>
+        
+        <p><strong>Thanks for registering!</strong></p>
+        
+        <?PHP
+        }
+        ?>
+
+        <a href="controller.php">Logout</a>
+ 
+        <div class="stats_note">
+            <p>Hi <?PHP echo(isset($args["registration"]) ? $args["registration"]["fn"] : ""); ?>, you have attended <strong><?PHP echo($args["registration"]["evts"]); ?></strong> event(s).  
+            
+            <?PHP
+            if ($eligible_for != NULL) {
+            ?>
+            
+            You are eligible for the drawing for <?PHP echo($eligible_for); ?>.  
+            
+            <?PHP
+            }
+            ?>
+            
+            <?PHP
+            if ($next_prize != NULL) {
+            ?>
+            
+            You can get eligible for the drawing for <?PHP echo($next_prize); ?> by attending <strong><?PHP echo($events_needed); ?></strong> more event(s).  
+            
+            <?PHP
+            }
+            ?>
+            
+            </p>
+        </div>
+        
+        <br /><br />
+        <h2>Passport History</h2>
+        <br />
+        <?PHP
+        if (count($args["scores"]) > 0) {
+        ?>
+        <table border="1" cellspacing="1" cellpadding="4" class="stats_table">
+            <tr bgcolor="#fee3ad">
+                <td width="350px"><strong>Event</strong></td>
+                <td width="150px"><strong>Reason</strong></td>
+                <?PHP if ($is_registered_for_team) { ?>
+                <td width="100px"><strong>Points</strong></td>
+                <?PHP } ?>
+
+            </tr>
+            
+            <?PHP
+              foreach ($args["scores"] as $score) {
+            ?>
+            
+            <tr>
+                <td><?PHP echo($args["events"][$score["eid"]]); ?></td>
+                <td><?PHP echo($score["act"] == 0 ? "Attended" : urldecode($score["comment"])); ?></td>
+                <?PHP if ($is_registered_for_team) { ?>
+                <td><?PHP echo(isset($score["pts"]) ? $score["pts"] : 0); ?></td>
+                <?PHP } ?>
+            </tr>
+            
+            <?PHP
+              }
+            ?>
+        </table>
+        
+        <?PHP
+        } else {
+        ?>
+        
+        <p>You have not yet attended any events.  Once you've attended an event, you will see your history here.</p>
+        
+        <?PHP
+        }
+        ?>
+        
+        <br /><br />
+        <h2>Team Information</h2>
+        <br />
+        
+        <?PHP
+        if (!$is_registered_for_team) {
+        ?>
+        <p>
+        It looks like you are not registered for a team.  If you would like to start a team, click the "Register a Team" button.  If you are supposed to be on a team, please ask your team captain to add you to their team.
+        
+        <br /><br />
+        <form method="post" action="<?PHP echo($_SERVER["SCRIPT_NAME"]); ?>?state=team_registration">
+          <input type="submit" value="Register a Team" class="stats_submit" />
+          <input type="hidden" name="bid" value="<?PHP echo($args["bid"]); ?>" />
+          <input type="hidden" name="pin" value="<?PHP echo($args["pin"]); ?>" />
+        </form>
+        </p>
+        <?PHP
+        } else if ($is_team_captain) {
+        ?>
+        <p>
+        You are the team captain for your team.  Click the "Team Roster" button to view your team roster (including points by team member) and to add new members.
+        
+        <br /><br />
+        <form method="post" action="<?PHP echo($_SERVER["SCRIPT_NAME"]); ?>?state=team_registration">
+          <input type="submit" value="Team Roster" class="stats_submit" />
+          <input type="hidden" name="bid" value="<?PHP echo($args["bid"]); ?>" />
+          <input type="hidden" name="pin" value="<?PHP echo($args["pin"]); ?>" />
+        </form>
+        </p>
+        <?PHP
+        }
+        ?>
+        
+        <?PHP
+        if ($is_registered_for_team) {
+        ?>
+        
+        <br />
+        <p>
+          Here is some information about your team (<strong><?PHP echo($args["team"]["name"]); ?></strong>):<br>
+          You have earned <?PHP echo(isset($args["registration"]["pts"]) ? $args["registration"]["pts"] : 0); ?> point(s).<br>
+          Your team has earned a total of <?PHP echo(isset($args["team"]["pts"]) ? $args["team"]["pts"] : 0); ?> point(s).
+        </p>
+        <?PHP
+        }
+        ?>
+
+        <p>&nbsp;</p>
+        <p>
+          <ul>
+            <li><a href="http://esc.calpoly.edu/eweek" class="golink">eWeek Homepage</a></li>
+            <?PHP if ($is_registered_for_team) { ?><li><a href="controller.php?state=team_leaderboard" class="golink">Team Leaderboard</a></li> <?PHP } ?>
+          </ul>
+        </p>
+
+	</div>
+
+</div>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-12936006-3");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+</body>
+</html>
+
