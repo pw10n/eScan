@@ -6,6 +6,9 @@
  *    Brian Oppenheim <brianopp@gmail.com> 
  *    Prentice Wongvibulsin <me@prenticew.com>
  *
+ *  Project URL:
+ *    http://www.prenticew.com/escan
+ *
  *  This file is part of eScan.
  *
  *   eScan is free software: you can redistribute it and/or modify
