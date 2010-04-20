@@ -53,25 +53,6 @@ $events_data = array(
   );
 
 // DEPRECATED - Will move to MySQL
-$majors = array(
-  "AERO" => "Aerospace Engineering",
-  "ARCE" => "Architecutral Engineering",
-  "BMED" => "Biomedical Engineering",
-  "BRAE" => "BioResource and Agricultural Engineering",
-  "CE"   => "Civil Engineering",
-  "CPE"  => "Computer Engineering",
-  "CSC"  => "Computer Science",
-  "EE"   => "Electrical Engineering",
-  "ENVE" => "Environmental Engineering",
-  "GENE" => "General Engineering",
-  "IE"   => "Industrial Engineering",
-  "MATE" => "Materials Engineering",
-  "MFGE" => "Manufacturing Engineering",
-  "ME"   => "Mechanical Engineering",
-  "SE"   => "Software Engineering",
-  "OTHR" => "Other");
-
-// DEPRECATED - Will move to MySQL
 // An ascending SORTED array of prize levels.
 $prize_levels = array(
   1 => "$50 Amazon Gift Card (1 of 3)",

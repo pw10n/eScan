@@ -40,6 +40,14 @@ function get_mysql_connection() {
   return $con;
 }
 
+// Returns the list of majors.
+//
+// Returns:
+//   An array containing all of the majors (their code and name).
+function get_majors() {
+  return query_to_array("SELECT * FROM `majors`");
+}
+
 // Returns the event with the given eid.
 //
 // Args:
@@ -61,7 +69,7 @@ function get_event($eid){
 function add_user($bid, $pin) {
   $con = get_mysql_connection();
   $result = mysql_query("INSERT INTO `users`(`bid`, `pin`, `s`, `tid`) ".
-                          "VALUES(" . $bid . ", " . $pin . ", " .i
+                          "VALUES(" . $bid . ", " . $pin . ", " .
                           PASSPORT_STATE_UNREGISTERED . ", " .
                           PASSPORT_NO_TEAM_TID . ")",
                         $con)
@@ -221,7 +229,10 @@ function get_eligible_users_with_min_events($minNumEvents) {
   return query_to_array("SELECT * FROM `users_annotated` WHERE " .
                         "(SELECT count(*) FROM `score` WHERE " .
                         "`score`.`act` = 0 AND " .
-                      `score`.`uid` = `users`.`uid`)>= " . $minNumEvents . " AND `s` = " . PASSPORT_STATE_REGISTERED . " AND `elig`");
+                        "`score`.`uid` = `users_annotated`.`uid`)>= " .
+                        $minNumEvents .
+                        " AND `s` = " . PASSPORT_STATE_REGISTERED .
+                        " AND `elig`");
 }
 
 // Gets all of the users that attended a given event.
@@ -234,7 +245,8 @@ function get_eligible_users_with_min_events($minNumEvents) {
 //   with the given eventId.
 function get_users_by_event($eventId) {
   return query_to_array("SELECT * FROM `users_annotated`, `score` WHERE " .
-                        `score`.`uid` = `users`.`uid` AND `eid` = " . $eventId);
+                        "`score`.`uid` = `users_annotated`.`uid` AND `eid` = " .
+                        $eventId);
 }
 
 // Gets all users that are either registered, scanned in, or on a team.
@@ -293,7 +305,8 @@ function do_scan($eid, $user){
   $uid = $user['uid'];
   // TODO: separate db logic from business logic 
 
-  $check_query = "SELECT * FROM score WHERE `uid`=" . $uid . " and `eid`=" . $eid . " and `act`=0";
+  $check_query = "SELECT * FROM score WHERE `uid` = " . $uid .
+                 " AND `eid`=" . $eid . " and `act`=0";
 
   $check_result = mysql_query($check_query, $con)
             or die('mysql_query: ' . mysql_error());
@@ -327,7 +340,9 @@ function do_pscan($eid, $cact, $user){
   $uid = $user['uid'];
   // TODO: separate db logic from business logic 
 
-  $check_query = "SELECT * FROM score WHERE `uid`=" . $uid . " and `eid`=" . $eid . " and `act`=1 and `comment`='" . urlencode($cact) . "'";
+  $check_query = "SELECT * FROM score WHERE `uid` = " . $uid . " and `eid`=" .
+                 $eid . " AND `act` = 1 AND `comment`='" .
+                 urlencode($cact) . "'";
 
   $check_result = mysql_query($check_query, $con)
             or die('mysql_query: ' . mysql_error());
@@ -382,7 +397,7 @@ function get_event_attendance_by_time_slice($eventId, $timeSlice) {
 //   the barcode id for the user with the given user id
 function get_bid($uid){
   $con = get_mysql_connection();
-    
+ 
   $result = mysql_query("SELECT * FROM `users` WHERE `uid` = " . $uid);
 
   mysql_close($con);
@@ -432,13 +447,12 @@ function log_entry($mode, $action, $optionalFieldsMap=array()) {
 //   An array of user ids that received a point scan for the given activity at
 //   the given event.
 //
-function get_pscanned($eid, $cact){
+function get_pscanned($eid, $cact) {
   return query_to_array("SELECT * FROM `users_annotated` " .
                         "WHERE `users_annotated`.`uid` IN " .
                         "(SELECT `score`.`uid` FROM `score` WHERE `eid` = " .
                         $eid . " and `act` = 1 and `comment` = '" .
-                        urlencode($cact) . "')")
-      or die('mysql_query:' . mysql_error());
+                        urlencode($cact) . "')");
 }
 
 // Gets all users with the given last name.
@@ -552,7 +566,7 @@ function get_major_counts($eid=-1) {
   return query_to_array($query);
 }
 
-// Extract the uid value from the given user.
+// Extracts the uid value from the given user.
 //
 // Args:
 //   user - the user to extract the uid from
@@ -561,6 +575,17 @@ function get_major_counts($eid=-1) {
 //   the uid of the given user
 function extract_uid($user) {
   return $user['uid'];
+}
+
+// Extracts the major code from the given major.
+//
+// Args:
+//   major - the major to extract the code from
+//
+// Returns:
+//   The code for the given major.
+function extract_major_code($major) {
+  return $major["code"];
 }
 
 ?>

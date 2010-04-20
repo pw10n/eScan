@@ -46,7 +46,7 @@ function pscan_model(){
    }
 
    $users = array();
-   foreach ($pscanned as $uid){
+   foreach (array_map(extract_uid, $pscanned) as $uid){
       $users[] = get_user(get_bid($uid));
    }
 

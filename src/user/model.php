@@ -195,8 +195,6 @@ function sanitized_registration() {
 // Returns:
 //   An array of the fields that are invalid.
 function validate_registration($registration) {
-  global $majors;
-
   $invalid_fields = array();
 
   if (strlen($registration["fn"]) == 0 ||
@@ -209,11 +207,13 @@ function validate_registration($registration) {
     $invalid_fields[] = "ln";
   }
 
-  if (array_key_exists($registration["ma"], $majors) == false) {
+  if (!array_search($registration["ma"],
+                    array_map(extract_major_code, get_majors()))) {
+
     $invalid_fields[] = "ma";
   }
 
-  if (filter_var($registration["em"], FILTER_VALIDATE_EMAIL) == false) {
+  if (!filter_var($registration["em"], FILTER_VALIDATE_EMAIL)) {
     $invalid_fields[] = "em";
   }
 
@@ -254,13 +254,11 @@ function handle_registration($bid,
 			     $registration=array(),
 			     $extra_args=array()) {
 
-  global $majors;
-				   
   return array("view" => "registration",
                "args" => array("bid" => $bid,
                                "pin" => $pin,
                                "registration" => $registration,
-                               "majors" => $majors) +
+                               "majors" => get_majors()) +
 		         $extra_args);
 }
 
