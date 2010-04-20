@@ -17,14 +17,6 @@ define(LOG_ADMIN_ACTION_SCAN_EXTRA_POINTS, 1);
 define(LOG_ADMIN_ACTION_GENERATE_PIN, 2);
 define(LOG_ADMIN_ACTION_SWAP_PASSPORT, 3);
 
-// Base query for selecting users.  This adds total points (pts) and number of
-// events attendend (evts) to the fields that the database has for each user.
-$user_base_query = "SELECT *, (SELECT sum(`pts`) FROM `score` WHERE `score`.`uid` = `users`.`uid`) as `pts`, (SELECT count(*) FROM `score` WHERE `score`.`uid` = `users`.`uid` and `score`.`act` = 0) as `evts` FROM `users`";
-
-// Base query for selecting teams.  This adds total points (pts) to the fields
-// that the databse has for each team.
-$team_base_query = "SELECT *, (SELECT sum(`pts`) FROM `users`, `score` WHERE `users`.`uid` = `score`.`uid` AND `users`.`tid` = `team`.`tid`) as `pts` FROM `team`";
-
 // Opens and returns a new MySQL database connection to the database configured
 // in dbconf.php.
 //
@@ -88,13 +80,11 @@ function get_user($bid) {
     return null;
   }
 
-  // Grab the base query for users.
-  global $user_base_query;
-
   $con = get_mysql_connection();
 
   // Try to get the user from the database.
-  $result = mysql_query($user_base_query . " WHERE `bid` = " . $bid, $con)
+  $result = mysql_query("SELECT * FROM `users_annotated` WHERE `bid` = " . $bid,
+                        $con)
             or die('mysql_query: ' . mysql_error());
 
   // Get the single row from the result.
@@ -112,9 +102,7 @@ function get_user($bid) {
 //   An array containing an entry for each team in the database plus. The array
 //   is sorted in decsending order by total points.
 function get_all_teams() {
-  global $team_base_query;
-
-  return query_to_array($team_base_query . " ORDER BY `pts` DESC");
+  return query_to_array("SELECT * FROM `team_annotated` ORDER BY `pts` DESC");
 }
 
 // Gets the team with the given tid from the database, including its total
@@ -131,13 +119,11 @@ function get_team($tid) {
     return null;
   }
 
-  // Grab the base query for getting teams.
-  global $team_base_query;
-
   $con = get_mysql_connection();
 
   // Try to get a team from the database.
-  $result = mysql_query($team_base_query . " WHERE `tid` = " . $tid, $con)
+  $result = mysql_query("SELECT * FROM `team_annotated` WHERE `tid` = " . $tid,
+                        $con)
             or die('mysql_query: ' . mysql_error());
 
   // Get the single row from the result.
@@ -198,10 +184,10 @@ function assign_user_to_team($bid, $tid) {
 // Returns:
 //   An array of team members on the team with the given tid.
 function get_team_members($tid) {
-  global $user_base_query;
 
   // Get the users on the given team as an array.
-  return query_to_array($user_base_query . " WHERE `tid` = " . $tid);
+  return query_to_array("SELECT * FROM `users_annotated` WHERE `tid` = " .
+                        $tid);
 }
 
 // Gets the score rows from the database for the user with the given barcode id.
@@ -232,10 +218,10 @@ function get_user_scores($bid) {
 //   An array of users records for registered, prize eligible users that have
 //   attended the given minimum number of events.
 function get_eligible_users_with_min_events($minNumEvents) {
-  // Grabs the base query for selecting users.
-  global $user_base_query;
-
-  return query_to_array($user_base_query . " WHERE (SELECT count(*) FROM `score` WHERE `score`.`act` = 0 AND `score`.`uid` = `users`.`uid`) >= " . $minNumEvents . " AND `s` = " . PASSPORT_STATE_REGISTERED . " AND `elig`");
+  return query_to_array("SELECT * FROM `users_annotated` WHERE " .
+                        "(SELECT count(*) FROM `score` WHERE " .
+                        "`score`.`act` = 0 AND " .
+                      `score`.`uid` = `users`.`uid`)>= " . $minNumEvents . " AND `s` = " . PASSPORT_STATE_REGISTERED . " AND `elig`");
 }
 
 // Gets all of the users that attended a given event.
@@ -247,10 +233,8 @@ function get_eligible_users_with_min_events($minNumEvents) {
 //   An array of user records that represent users that attended the event
 //   with the given eventId.
 function get_users_by_event($eventId) {
-  // Grabs the base query for selecting users.
-  global $user_base_query;
-
-  return query_to_array($user_base_query . ", `score` WHERE `score`.`uid` = `users`.`uid` AND `eid` = " . $eventId);
+  return query_to_array("SELECT * FROM `users_annotated`, `score` WHERE " .
+                        `score`.`uid` = `users`.`uid` AND `eid` = " . $eventId);
 }
 
 // Gets all users that are either registered, scanned in, or on a team.
@@ -258,10 +242,10 @@ function get_users_by_event($eventId) {
 // Returns:
 //   An array of all registered, scanned in, or on a team users.
 function get_actioned_users() {
-  // Grabs the base query for selecting users.
-  global $user_base_query;
-
-  return query_to_array($user_base_query . " WHERE `s` = " . PASSPORT_STATE_REGISTERED . " OR `uid` IN (SELECT `uid` FROM `score`) OR `tid` != " . PASSPORT_NO_TEAM_TID);
+  return query_to_array("SELECT * FROM `users_annotated` WHERE `s` = " .
+                        PASSPORT_STATE_REGISTERED . " OR `uid` IN " .
+                        "(SELECT `uid` FROM `score`) OR `tid` != " .
+                        PASSPORT_NO_TEAM_TID);
 }
 
 // Gets the total number of attendees at all events that have had at least one
@@ -302,8 +286,6 @@ function do_scan($eid, $user){
      return false;
   }
 
-  global $user_base_query;
-
   $success = false;
 
   $con = get_mysql_connection();
@@ -337,7 +319,6 @@ function do_pscan($eid, $cact, $user){
   }
 
   global $events_data;
-  global $user_base_query;
 
   $success = false;
 
@@ -451,23 +432,13 @@ function log_entry($mode, $action, $optionalFieldsMap=array()) {
 //   An array of user ids that received a point scan for the given activity at
 //   the given event.
 //
-// TODO(brianopp): change this to return full users rather than uids
 function get_pscanned($eid, $cact){
-   $con = get_mysql_connection();
-
-   $result = mysql_query("SELECT * FROM `score` WHERE `eid` = " . $eid . " and `act`=1 and `comment`='" . urlencode($cact) . "'", $con)
+  return query_to_array("SELECT * FROM `users_annotated` " .
+                        "WHERE `users_annotated`.`uid` IN " .
+                        "(SELECT `score`.`uid` FROM `score` WHERE `eid` = " .
+                        $eid . " and `act` = 1 and `comment` = '" .
+                        urlencode($cact) . "')")
       or die('mysql_query:' . mysql_error());
-
-   mysql_close($con);
-
-   $retval = array();
-
-   // Get the user id for each returned user.
-   while (($row = mysql_fetch_array($result)) != null){
-      $retval[] = $row['uid'];
-   }
-
-   return $retval;
 }
 
 // Gets all users with the given last name.
@@ -478,9 +449,7 @@ function get_pscanned($eid, $cact){
 // Returns:
 //   All of the users with the given last name.
 function get_users_by_lastname($lastname) {
-  global $user_base_query;
-
-  return query_to_array($user_base_query . " WHERE `ln` = \"" .
+  return query_to_array("SELECT * FROM `users_annotated` WHERE `ln` = \"" .
                         $lastname . "\"");
 }
 
@@ -581,6 +550,17 @@ function get_major_counts($eid=-1) {
   $query .= "GROUP BY `ma` ORDER BY `att`";
 
   return query_to_array($query);
+}
+
+// Extract the uid value from the given user.
+//
+// Args:
+//   user - the user to extract the uid from
+//
+// Returns:
+//   the uid of the given user
+function extract_uid($user) {
+  return $user['uid'];
 }
 
 ?>
