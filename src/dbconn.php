@@ -479,12 +479,18 @@ function swap_passports($old_bid, $new_bid) {
 
   $con = get_mysql_connection();
 
-  // Delete the record that was in the databse for the new passport id.
-  mysql_query("DELETE FROM `users` WHERE `uid` = " . $new_user["uid"], $con)
+  // Update the current record for the new passport to be disabled and have the
+  // old barcode id.
+  mysql_query("UPDATE `users` SET `bid` = " . $old_user["bid"] . ", `s` = " .
+                PASSPORT_STATE_SWAPPED_OUT . " WHERE `uid` = " .
+                $new_user["uid"],
+              $con)
   or die('mysql_query: ' . mysql_error());
 
   // Update the user's passport entry to have the new passport id.
-  mysql_query("UPDATE `users` SET `bid` = " . $new_user["bid"] . ", `pin` = " . $new_user["pin"] . " WHERE `uid` = " . $old_user["uid"], $con)
+  mysql_query("UPDATE `users` SET `bid` = " . $new_user["bid"] . ", `pin` = " .
+                $new_user["pin"] . " WHERE `uid` = " . $old_user["uid"],
+              $con)
   or die('mysql_query: ' . mysql_error());
 
   mysql_close($con);

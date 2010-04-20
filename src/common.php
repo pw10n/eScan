@@ -67,6 +67,7 @@ define(PASSPORT_NO_TEAM_TID, -1);
 
 define(PASSPORT_STATE_UNREGISTERED, 1);
 define(PASSPORT_STATE_REGISTERED, 2);
+define(PASSPORT_STATE_SWAPPED_OUT, 3);
 
 define(PASSPORT_EMAIL_OPT_IN, 0);
 define(PASSPORT_EMAIL_OPT_OUT, 1);
@@ -79,20 +80,6 @@ define(SCORE_TYPE_POINTS, 1);
 define(DEFAULT_STATISTICS_TIME_SLICE, 10);
 
 // Utility Functions
-
-// Determines if the given user has registered their passport.
-//
-// Args:
-//   bid - the barcode id of the passport to check
-//
-// Returns:
-//   True if a passport with the given barcode id exists and is registered,
-//   false otherwise.
-function is_registered($bid) {
-  $user_record = get_user($bid);
-
-  return $user_record != null && $user_record["s"] == PASSPORT_STATE_REGISTERED;
-}
 
 // Gets the username provided by the user via HTTP authentication.
 //

@@ -52,10 +52,20 @@ function login_model_helper($bid, $pin) {
   // need to be registered.  Already registered passports go straight to the
   // stats screen.
 
-  if (is_registered($bid)) {
-    return handle_stats($bid, $pin);
-  } else {
-    return handle_registration($bid, $pin);
+  $user = get_user($bid);
+
+  switch($user["s"]) {
+    case PASSPORT_STATE_UNREGISTERED:
+      return handle_registration($bid, $pin);
+      break;
+
+    case PASSPORT_STATE_REGISTERED:
+      return handle_stats($bid, $pin);
+      break;
+
+    case PASSPORT_STATE_SWAPPED_OUT:
+    default:
+      return handle_failed_login();
   }
 }
 
