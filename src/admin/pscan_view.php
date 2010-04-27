@@ -36,6 +36,7 @@
 <link type="image/x-icon" rel="shortcut icon" href="../images/favicon.ico"/>
 <title>eWeek - Event Scan-In</title>
 </head>
+<body onload="document.getElementById('bid').focus()">
 <h1><?php echo $args["event"]["name"]; ?></h1>
 <h3>Points: <?php echo $args["event"]["points"][$args["act"]]; ?></h3>
 <p>&nbsp;<p>
@@ -61,5 +62,6 @@ Scan:<input type="hidden" name="eid" id="eid" value="<?php echo $args["eid"]; ?>
 </form>
 <p>&nbsp;<p>
 <a href="controller.php">Back to Admin</a>
+</body>
 
 </html>

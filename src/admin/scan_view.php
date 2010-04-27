@@ -168,7 +168,7 @@ body {
 
 </head>
 
-<body>
+<body onload="document.getElementById('barcode').focus()">
 
 <div id="wrapper">
         <div id="header">
