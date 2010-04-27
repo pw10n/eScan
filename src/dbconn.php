@@ -29,6 +29,7 @@
 require_once "dbinfo.php";
 require_once "common.php";
 
+// Constants used for representing data in the database.
 define(LOG_MODE_USER, 0);
 define(LOG_MODE_ADMIN, 1);
 
@@ -42,34 +43,48 @@ define(LOG_ADMIN_ACTION_SCAN_EXTRA_POINTS, 1);
 define(LOG_ADMIN_ACTION_GENERATE_PIN, 2);
 define(LOG_ADMIN_ACTION_SWAP_PASSPORT, 3);
 
-$user_base_query = "SELECT *, (SELECT sum(`pts`) FROM `score` WHERE `score`.`uid` = `users`.`uid`) as `pts`, (SELECT count(*) FROM `score` WHERE `score`.`uid` = `users`.`uid` and `score`.`act` = 0) as `evts` FROM `users`";
-
-$team_base_query = "SELECT *, (SELECT sum(`pts`) FROM `users`, `score` WHERE `users`.`uid` = `score`.`uid` AND `users`.`tid` = `team`.`tid`) as `pts` FROM `team`";
-
-// Opens and returns a new MySQL database connection.
+// Opens and returns a new MySQL database connection to the database configured
+// in dbconf.php.
 //
 // Returns:
-//   A newly opened MySQL connection.
+//   A newly opened MySQL connection to the configured database.
 function get_mysql_connection() {
+  // Grab the database configuration variables.
   global $mysql_server, $mysql_user, $mysql_pass, $mysql_db;
 
+  // Create a connection.
   $con = mysql_connect($mysql_server, $mysql_user, $mysql_pass);
 
+  // Make sure that we actually got a connection.
   if ($con == false) {
     die('mysql_connect: ' . mysql_error());
   }
 
+  // Select the configured database.
   mysql_select_db($mysql_db, $con) or die('mysql_select_db: ' . mysql_error());
 
   return $con;
 }
 
+// Returns the list of majors.
+//
+// Returns:
+//   An array containing all of the majors (their code and name).
+function get_majors() {
+  return query_to_array("SELECT * FROM `majors`");
+}
 
+// Returns the event with the given eid.
+//
+// Args:
+//   eid - the event id of the event to get
+//
+// Returns:
+//   the requested event
 function get_event($eid){
    global $events_data;
    return $events_data[$eid];
 }
-
 
 // Adds an unregistered, teamless user to the database with the given barcode id
 // and pin.
@@ -80,30 +95,33 @@ function get_event($eid){
 function add_user($bid, $pin) {
   $con = get_mysql_connection();
   $result = mysql_query("INSERT INTO `users`(`bid`, `pin`, `s`, `tid`) ".
-                        "VALUES(" . $bid . ", " . $pin . ", " . PASSPORT_STATE_UNREGISTERED . ", " . PASSPORT_NO_TEAM_TID . ")", $con)
+                          "VALUES(" . $bid . ", " . $pin . ", " .
+                          PASSPORT_STATE_UNREGISTERED . ", " .
+                          PASSPORT_NO_TEAM_TID . ")",
+                        $con)
             or die('mysql_query: ' . mysql_error());
 }
 
-// Gets the row from the database for the user with the given barcode id with
-// the total points (pts) and number of events attended (evts) appended to each
-// record..
+// Gets the user with the given barcode id.
 //
 // Args:
 //   bid - the barcode id of the user
 // Returns:
 //   The user with barcode id bid or null if no such user exists.
 function get_user($bid) {
+  // Make sure we have actually gotten an id.
   if (strlen($bid) == 0) {
     return null;
   }
 
-  global $user_base_query;
-
   $con = get_mysql_connection();
 
-  $result = mysql_query($user_base_query . " WHERE `bid` = " . $bid, $con)
+  // Try to get the user from the database.
+  $result = mysql_query("SELECT * FROM `users_annotated` WHERE `bid` = " . $bid,
+                        $con)
             or die('mysql_query: ' . mysql_error());
 
+  // Get the single row from the result.
   $row = mysql_fetch_array($result);
 
   mysql_close($con);
@@ -111,17 +129,14 @@ function get_user($bid) {
   return $row;
 }
 
-// Gets all registered teams from the database with their total points, sorted
-// with most points first.
+// Gets all registered teams from the database, sorted by decsending total
+// points.
 //
 // Returns:
-//   An array containing an entry for each team in the database plus a 'pts'
-//   field that indicates the total points earned by the team.  The array is
-//   sorted in decsending order by total points.
+//   An array containing an entry for each team in the database plus. The array
+//   is sorted in decsending order by total points.
 function get_all_teams() {
-  global $team_base_query;
-
-  return query_to_array($team_base_query . " ORDER BY `pts` DESC");
+  return query_to_array("SELECT * FROM `team_annotated` ORDER BY `pts` DESC");
 }
 
 // Gets the team with the given tid from the database, including its total
@@ -138,13 +153,14 @@ function get_team($tid) {
     return null;
   }
 
-  global $team_base_query;
-
   $con = get_mysql_connection();
 
-  $result = mysql_query($team_base_query . " WHERE `tid` = " . $tid, $con)
+  // Try to get a team from the database.
+  $result = mysql_query("SELECT * FROM `team_annotated` WHERE `tid` = " . $tid,
+                        $con)
             or die('mysql_query: ' . mysql_error());
 
+  // Get the single row from the result.
   $row = mysql_fetch_array($result);
 
   mysql_close($con);
@@ -163,9 +179,11 @@ function get_team($tid) {
 function register_team($team_name, $cid) {
   $con = get_mysql_connection();
 
+  // Add the team to the database.
   mysql_query("INSERT INTO `team` (`cid`, `name`) VALUES (" . $cid . ", \"" . $team_name . "\")", $con)
   or die ('mysql_query: ' . mysql_error());
 
+  // Gets the primary key of the record we just inserted.
   $tid = mysql_insert_id($con);
 
   mysql_close($con);
@@ -179,12 +197,14 @@ function register_team($team_name, $cid) {
 //   bid - barcode id of the user to assign
 //   tid - team id to assign the user to
 function assign_user_to_team($bid, $tid) {
+  // Make sure that we actually got a barcode id and pin.
   if (strlen($bid) == 0 && strlen($pin)) {
     return null;
   }
 
   $con = get_mysql_connection();
 
+  // Make the assignment.
   mysql_query("UPDATE `users` SET `tid` = " . $tid . " WHERE `bid` = " . $bid,
               $con)
   or die('mysql_query: ' . mysql_error());
@@ -198,9 +218,10 @@ function assign_user_to_team($bid, $tid) {
 // Returns:
 //   An array of team members on the team with the given tid.
 function get_team_members($tid) {
-  global $user_base_query;
 
-  return query_to_array($user_base_query . " WHERE `tid` = " . $tid);
+  // Get the users on the given team as an array.
+  return query_to_array("SELECT * FROM `users_annotated` WHERE `tid` = " .
+                        $tid);
 }
 
 // Gets the score rows from the database for the user with the given barcode id.
@@ -210,19 +231,15 @@ function get_team_members($tid) {
 // Returns:
 //   The user's score record.
 function get_user_scores($bid) {
-
-  $con = get_mysql_connection();
-
   $user = get_user($bid);
   $uid = $user["uid"];
 
+  // If we got an invalid user, return null.
   if ($uid == null) {
-    return array();
+    return null;
   }
 
-  $scores = query_to_array("SELECT * FROM `score` WHERE `uid` = " . $uid, $con);
-  mysql_close($con);
-  return $scores;
+  return query_to_array("SELECT * FROM `score` WHERE `uid` = " . $uid);
 }
 
 // Gets all of the registered, prize eligible users that have attended a given
@@ -235,9 +252,13 @@ function get_user_scores($bid) {
 //   An array of users records for registered, prize eligible users that have
 //   attended the given minimum number of events.
 function get_eligible_users_with_min_events($minNumEvents) {
-  global $user_base_query;
-
-  return query_to_array($user_base_query . " WHERE (SELECT count(*) FROM `score` WHERE `score`.`act` = 0 AND `score`.`uid` = `users`.`uid`) >= " . $minNumEvents . " AND `s` = " . PASSPORT_STATE_REGISTERED . " AND `elig`");
+  return query_to_array("SELECT * FROM `users_annotated` WHERE " .
+                        "(SELECT count(*) FROM `score` WHERE " .
+                        "`score`.`act` = 0 AND " .
+                        "`score`.`uid` = `users_annotated`.`uid`)>= " .
+                        $minNumEvents .
+                        " AND `s` = " . PASSPORT_STATE_REGISTERED .
+                        " AND `elig`");
 }
 
 // Gets all of the users that attended a given event.
@@ -249,9 +270,9 @@ function get_eligible_users_with_min_events($minNumEvents) {
 //   An array of user records that represent users that attended the event
 //   with the given eventId.
 function get_users_by_event($eventId) {
-  global $user_base_query;
-
-  return query_to_array($user_base_query . ", `score` WHERE `score`.`uid` = `users`.`uid` AND `eid` = " . $eventId);
+  return query_to_array("SELECT * FROM `users_annotated`, `score` WHERE " .
+                        "`score`.`uid` = `users_annotated`.`uid` AND `eid` = " .
+                        $eventId);
 }
 
 // Gets all users that are either registered, scanned in, or on a team.
@@ -259,9 +280,10 @@ function get_users_by_event($eventId) {
 // Returns:
 //   An array of all registered, scanned in, or on a team users.
 function get_actioned_users() {
-  global $user_base_query;
-
-  return query_to_array($user_base_query . " WHERE `s` = " . PASSPORT_STATE_REGISTERED . " OR `uid` IN (SELECT `uid` FROM `score`) OR `tid` != " . PASSPORT_NO_TEAM_TID);
+  return query_to_array("SELECT * FROM `users_annotated` WHERE `s` = " .
+                        PASSPORT_STATE_REGISTERED . " OR `uid` IN " .
+                        "(SELECT `uid` FROM `score`) OR `tid` != " .
+                        PASSPORT_NO_TEAM_TID);
 }
 
 // Gets the total number of attendees at all events that have had at least one
@@ -271,8 +293,6 @@ function get_actioned_users() {
 //   An associative array of eventIds to attendance count for events that have
 //   had at least one attendee.
 function get_all_event_attendances() {
-  $con = get_mysql_connection();
-
   return query_to_array("SELECT `eid`, count(*) as `att` FROM `score` WHERE `act` = 0 GROUP BY `eid`");
 }
 
@@ -281,9 +301,6 @@ function get_all_event_attendances() {
 // Args:
 //   bid - barcode id of the user to register
 //   registration - array of registration parameters
-//
-// Returns:
-//   True if the registration succeeds, false otherwise.
 function register_user($bid, $registration) {
   $con = get_mysql_connection();
 
@@ -307,8 +324,6 @@ function do_scan($eid, $user){
      return false;
   }
 
-  global $user_base_query;
-
   $success = false;
 
   $con = get_mysql_connection();
@@ -316,7 +331,8 @@ function do_scan($eid, $user){
   $uid = $user['uid'];
   // TODO: separate db logic from business logic 
 
-  $check_query = "SELECT * FROM score WHERE `uid`=" . $uid . " and `eid`=" . $eid . " and `act`=0";
+  $check_query = "SELECT * FROM score WHERE `uid` = " . $uid .
+                 " AND `eid`=" . $eid . " and `act`=0";
 
   $check_result = mysql_query($check_query, $con)
             or die('mysql_query: ' . mysql_error());
@@ -342,7 +358,6 @@ function do_pscan($eid, $cact, $user){
   }
 
   global $events_data;
-  global $user_base_query;
 
   $success = false;
 
@@ -351,7 +366,9 @@ function do_pscan($eid, $cact, $user){
   $uid = $user['uid'];
   // TODO: separate db logic from business logic 
 
-  $check_query = "SELECT * FROM score WHERE `uid`=" . $uid . " and `eid`=" . $eid . " and `act`=1 and `comment`='" . urlencode($cact) . "'";
+  $check_query = "SELECT * FROM score WHERE `uid` = " . $uid . " and `eid`=" .
+                 $eid . " AND `act` = 1 AND `comment`='" .
+                 urlencode($cact) . "'";
 
   $check_result = mysql_query($check_query, $con)
             or die('mysql_query: ' . mysql_error());
@@ -397,69 +414,124 @@ function get_event_attendance_by_time_slice($eventId, $timeSlice) {
 
 }
 
+// Gets the barcode id for the given user id.
+//
+// Args:
+//   uid - the user id to get a barcode id for
+//
+// Returns:
+//   the barcode id for the user with the given user id
 function get_bid($uid){
-   $con = get_mysql_connection();
-   $result = mysql_query("SELECT * FROM `users` WHERE `uid` = " . $uid);
-   mysql_close($con);
-   $row = mysql_fetch_array($result);
-   return $row['bid'];
+  $con = get_mysql_connection();
+ 
+  $result = mysql_query("SELECT * FROM `users` WHERE `uid` = " . $uid);
+
+  mysql_close($con);
+
+  $row = mysql_fetch_array($result);
+
+  return $row['bid'];
 }
+
+// Puts an entry in the log table for the given scenario.
+//
+// Args:
+//   mode - signifies which system mode the log entry is for (user or admin)
+//   action - the action that was performed
+//   optionalFieldsMap - an associative array containing names to values for
+//                       optional fields
 function log_entry($mode, $action, $optionalFieldsMap=array()) {
+  // Create empty arrays in case no optional fields are specified.
   $optionalFields = array();
   $optionalValues = array();
 
+  // Prepare the optional fields and optional values arrays for the implode
+  // function in the query string.
   foreach ($optionalFieldsMap as $field => $value) {
     $optionalFields[] = "`" . $field . "`";
     $optionalValues[] = "\"" . $value . "\"";
   }
+
+  // Form the MySQL query to make the log entry.
   $query = "INSERT INTO `log` (`mode`, `action`" . (count($optionalFields) > 0 ? ", " : "") . implode($optionalFields, ", ") . ") VALUES (" . $mode . ", " . $action . (count($optionalValues) > 0 ? ", " : "") . implode($optionalValues, ", ") . ")";
 
   $con = get_mysql_connection();
 
-  mysql_query($query, $con)
-  or die ('mysql_query: ' . mysql_error());
+  mysql_query($query, $con) or die ('mysql_query: ' . mysql_error());
 
   mysql_close($con);
 }
 
-function get_pscanned($eid, $cact){
-   $retval = array();
-
-   $con = get_mysql_connection();
-
-   $result = mysql_query("SELECT * FROM `score` WHERE `eid` = " . $eid . " and `act`=1 and `comment`='" . urlencode($cact) . "'", $con)
-      or die('mysql_query:' . mysql_error());
-
-   mysql_close($con);
-
-   while (($row = mysql_fetch_array($result)) != null){
-      $retval[] = $row['uid'];
-   }
-
-   return $retval;
+// Gets the user ids of the users who received point scans for the given
+// activity at the given event.
+//
+// Args:
+//   eid - the id of the event
+//   cact - the id of the activity
+//
+// Returns:
+//   An array of user ids that received a point scan for the given activity at
+//   the given event.
+//
+function get_pscanned($eid, $cact) {
+  return query_to_array("SELECT * FROM `users_annotated` " .
+                        "WHERE `users_annotated`.`uid` IN " .
+                        "(SELECT `score`.`uid` FROM `score` WHERE `eid` = " .
+                        $eid . " and `act` = 1 and `comment` = '" .
+                        urlencode($cact) . "')");
 }
 
+// Gets all users with the given last name.
+//
+// Args:
+//   lastname - the last name of the users to get
+//
+// Returns:
+//   All of the users with the given last name.
 function get_users_by_lastname($lastname) {
-  global $user_base_query;
-
-  return query_to_array($user_base_query . " WHERE `ln` = \"" . $lastname . "\"");
+  return query_to_array("SELECT * FROM `users_annotated` WHERE `ln` = \"" .
+                        $lastname . "\"");
 }
 
+// Changes the user who's passport currently has barcode id old_bid to have
+// new_bid as its barcode id.
+//
+// Args:
+//   old_bid - the passport's current barcode id
+//   new_bid - the passport's new barcode id
 function swap_passports($old_bid, $new_bid) {
   $old_user = get_user($old_bid);
   $new_user = get_user($new_bid);
 
   $con = get_mysql_connection();
 
-  mysql_query("DELETE FROM `users` WHERE `uid` = " . $new_user["uid"], $con)
+  // Update the current record for the new passport to be disabled and have the
+  // old barcode id.
+  mysql_query("UPDATE `users` SET `bid` = " . $old_user["bid"] . ", `s` = " .
+                PASSPORT_STATE_SWAPPED_OUT . " WHERE `uid` = " .
+                $new_user["uid"],
+              $con)
   or die('mysql_query: ' . mysql_error());
 
-  mysql_query("UPDATE `users` SET `bid` = " . $new_user["bid"] . ", `pin` = " . $new_user["pin"] . " WHERE `uid` = " . $old_user["uid"], $con)
+  // Update the user's passport entry to have the new passport id.
+  mysql_query("UPDATE `users` SET `bid` = " . $new_user["bid"] . ", `pin` = " .
+                $new_user["pin"] . " WHERE `uid` = " . $old_user["uid"],
+              $con)
   or die('mysql_query: ' . mysql_error());
 
   mysql_close($con);
 }
 
+// Runs the given query and returns the result as an array with each entry being
+// a row returned from the database.  Optionally, a connection can be specified
+// to be used.  Otherwise a new connection is opened, used, then closed.
+//
+// Args:
+//   query - the MySQL query to run
+//   conToUse - if desired, the MySQL connection to use
+//
+// Returns:
+//   An array with each entry representing a row from the MySQL result.
 function query_to_array($query, $conToUse=null) {
   $con = $conToUse;
 
@@ -483,14 +555,37 @@ function query_to_array($query, $conToUse=null) {
   return $rows;
 }
 
+// Gets the number of atendees who attended each number of events.  For instance
+// how many users attended 1 event, 2 events, etc.
+//
+// Returns:
+//   An array of entries that each has a number of events and the number of
+//   users that attended that many events.
 function get_num_events_attended_counts() {
   return query_to_array("SELECT evts, count(*) AS att FROM (SELECT (SELECT count(*) FROM `score` WHERE `act` = " . SCORE_TYPE_ATTENDANCE . " AND `score`.`uid` = `users`.`uid`) AS evts FROM `users`) AS userevts GROUP BY `evts` HAVING `evts` > 0 ORDER BY `evts`");
 }
 
+// Gets the number of attendees at each event for which that event was their
+// first event.
+//
+// Returns:
+//   An array of entries giving the event id and number of attendees for which
+//   that event was their first event.
 function get_first_event_counts() {
   return query_to_array("SELECT `mevts`.`feid`, count(*) AS att FROM (SELECT (SELECT min(`eid`) FROM `score` WHERE `score`.`uid` = `users`.`uid` AND `act` = " . SCORE_TYPE_ATTENDANCE . ") AS feid FROM `users`) AS mevts GROUP BY `mevts`.`feid` HAVING `mevts`.`feid` IS NOT NULL ORDER BY `mevts`.`feid`");
 }
 
+// Gets the number of attendees in each major either overall or for a specific
+// event.
+//
+// Args:
+//   eid - if specified, the id of the event to get major counts for
+//
+// Returns:
+//   An associative array mapping the major code for each major to the number of
+//   attendees for the major.  These totals are for the specified event (if
+//   an event id was specified).  Otherwise, the total attendance figures over
+//   all events is given.
 function get_major_counts($eid=-1) {
   $query = "SELECT `ma`, count(*) AS att FROM `users` WHERE `s` = " . PASSPORT_STATE_REGISTERED . " ";
 
@@ -502,5 +597,28 @@ function get_major_counts($eid=-1) {
 
   return query_to_array($query);
 }
+
+// Extracts the uid value from the given user.
+//
+// Args:
+//   user - the user to extract the uid from
+//
+// Returns:
+//   the uid of the given user
+function extract_uid($user) {
+  return $user['uid'];
+}
+
+// Extracts the major code from the given major.
+//
+// Args:
+//   major - the major to extract the code from
+//
+// Returns:
+//   The code for the given major.
+function extract_major_code($major) {
+  return $major["code"];
+}
+
 ?>
 

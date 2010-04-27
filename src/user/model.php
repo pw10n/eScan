@@ -79,10 +79,20 @@ function login_model_helper($bid, $pin) {
   // need to be registered.  Already registered passports go straight to the
   // stats screen.
 
-  if (is_registered($bid)) {
-    return handle_stats($bid, $pin);
-  } else {
-    return handle_registration($bid, $pin);
+  $user = get_user($bid);
+
+  switch($user["s"]) {
+    case PASSPORT_STATE_UNREGISTERED:
+      return handle_registration($bid, $pin);
+      break;
+
+    case PASSPORT_STATE_REGISTERED:
+      return handle_stats($bid, $pin);
+      break;
+
+    case PASSPORT_STATE_SWAPPED_OUT:
+    default:
+      return handle_failed_login();
   }
 }
 
@@ -222,8 +232,6 @@ function sanitized_registration() {
 // Returns:
 //   An array of the fields that are invalid.
 function validate_registration($registration) {
-  global $majors;
-
   $invalid_fields = array();
 
   if (strlen($registration["fn"]) == 0 ||
@@ -236,11 +244,13 @@ function validate_registration($registration) {
     $invalid_fields[] = "ln";
   }
 
-  if (array_key_exists($registration["ma"], $majors) == false) {
+  if (!array_search($registration["ma"],
+                    array_map(extract_major_code, get_majors()))) {
+
     $invalid_fields[] = "ma";
   }
 
-  if (filter_var($registration["em"], FILTER_VALIDATE_EMAIL) == false) {
+  if (!filter_var($registration["em"], FILTER_VALIDATE_EMAIL)) {
     $invalid_fields[] = "em";
   }
 
@@ -281,13 +291,11 @@ function handle_registration($bid,
 			     $registration=array(),
 			     $extra_args=array()) {
 
-  global $majors;
-				   
   return array("view" => "registration",
                "args" => array("bid" => $bid,
                                "pin" => $pin,
                                "registration" => $registration,
-                               "majors" => $majors) +
+                               "majors" => get_majors()) +
 		         $extra_args);
 }
 

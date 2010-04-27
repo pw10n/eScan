@@ -46,21 +46,17 @@ function pscan_model(){
    global $events_data;
    $urlec_act = $_GET['act']; 
    $act = urldecode($urlec_act);
-   $eid = filter_input(INPUT_GET,'eid',FILTER_SANITIZE_NUMBER_INT);
-   $bid = filter_input(INPUT_GET,'bid',FILTER_SANITIZE_NUMBER_INT);
+   $eid = filter_input(INPUT_GET, 'eid', FILTER_SANITIZE_NUMBER_INT);
+   $bid = filter_input(INPUT_GET, 'bid', FILTER_SANITIZE_NUMBER_INT);
 
    // get people who have already been scanned for htis
-   //
-
    $scanned = false;
    $pscanned = get_pscanned($eid, $act);
 
    // do pscan if bid is provided
-   //
-
    if (isset($_GET['bid'])){
       $user = get_user($bid);
-      if (false == in_array($user['uid'], $pscanned)){
+      if (!in_array($user['uid'], array_map(extract_uid, $pscanned))) {
          do_pscan($eid, $act, $user);
          log_entry(LOG_MODE_ADMIN,
                    LOG_ADMIN_ACTION_SCAN_EXTRA_POINTS,
@@ -76,7 +72,7 @@ function pscan_model(){
    }
 
    $users = array();
-   foreach ($pscanned as $uid){
+   foreach (array_map(extract_uid, $pscanned) as $uid){
       $users[] = get_user(get_bid($uid));
    }
 

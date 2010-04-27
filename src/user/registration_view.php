@@ -106,7 +106,9 @@
             <select name="ma" id="ma">
               <?PHP
               if (isset($args["majors"])) {
-                foreach ($args["majors"] as $code => $name) {
+                foreach ($args["majors"] as $major) {
+                  $code = $major["code"];
+                  $name = $major["name"];
                   $selectedString = isset($args["registration"]) &&
                                     strcmp($args["registration"]["ma"], $code) == 0 ? " selected=\"selected\"" : "";
                   echo("<option value=\"$code\" title=\"$name\"" . $selectedString . ">$name</option>\n");
