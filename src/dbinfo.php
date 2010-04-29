@@ -30,7 +30,7 @@
 $mysql_server = "localhost";
 
 // Name of the MySQL database
-$mysql_db = "eweek";
+$mysql_db = "dr";
 
 // Username for accessing the MySQL database
 $mysql_user = "root";
