@@ -1,6 +1,6 @@
-AuthUserFile /var/www/eweek_passport/admin/.htpasswd
+AuthUserFile /var/www/dr/admin/.htpasswd
 AuthGroupFile /dev/null
-AuthName "eWeek Passport Administration"
+AuthName "DR Passport Administration"
 AuthType Basic
 require valid-user
 
