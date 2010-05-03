@@ -57,7 +57,7 @@
 
 <h1>Passport Administration</h1>
 
-<p>You are logged in as <strong><?PHP echo($args["user"]); ?></strong>. (<a href="http://logout:logout@acm.calpoly.edu/eweek_passport/admin">Logout</a>)<br>
+<p>You are logged in as <strong><?PHP echo($args["user"]); ?></strong>. (<a href="http://logout:logout@acm.calpoly.edu/dr/admin">Logout</a>)<br>
 <i>NOTE:</i> All administrative actions are logged.  Please help us maintain fairness by being only using this site for accurate reporting.  Do not accept boarcode numbers without a passport present.  Do not scan more than one passport per person.</p>
 
 <h2>Events</h2>
