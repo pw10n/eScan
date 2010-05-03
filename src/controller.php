@@ -77,10 +77,9 @@ function main_controller($state, $states, $views) {
   if(!array_key_exists($state, $states)){
     die("Invalid State");
   }
-
+  
   // Execute the model code for the state and capture the result.
   $result = $states[$state]();
-
   // Create an empty array for view args.
   $view_args = array();
 
@@ -100,7 +99,6 @@ function main_controller($state, $states, $views) {
   if (!array_key_exists($view, $views)){
     die("Invalid View");
   }
-
   // Call the view code.
   $views[$view]($view_args);
 }

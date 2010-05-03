@@ -54,7 +54,6 @@ function do_logged_in_model($model_function) {
   if (!post_has_login_info()) {
     return handle_login();
   }
-
   $bid = sanitized_bid();
   $pin = sanitized_pin();
 
@@ -112,7 +111,7 @@ function registration_model_helper($bid, $pin) {
     return handle_stats($bid, $pin);
   } else {
     $registration = sanitized_registration();
-
+    
     // Make sure that the entered registration fields are valid.
     $badRegistrationFields = validate_registration($registration);
 
@@ -130,7 +129,7 @@ function registration_model_helper($bid, $pin) {
     } else {
       return handle_registration($bid,
                                  $pin,
-            			               $registration,
+                                 $registration,
                                  array("badRegistration" =>
                                          $badRegistrationFields));
     }
@@ -502,9 +501,9 @@ function valid_team_name($team_name) {
 function validate_login($bid, $pin) {
   $user_record = get_user($bid);
 
-  return $user_record != null &&
-         isset($user_record["pin"]) &&
-         strcmp($user_record["pin"], $pin) == 0;
+  return $user_record != null; //&&
+         //isset($user_record["pin"]) &&
+         //strcmp($user_record["pin"], $pin) == 0;
 }
 
 // Determines if the post arguments include login data.
@@ -523,12 +522,8 @@ function sanitized_bid() {
   return filter_input(INPUT_POST, 'bid', FILTER_SANITIZE_NUMBER_INT);
 }
 
-// Sanitizes the user provided pin.
-//
-// Returns:
-//   a safe copy of the user-supplied pin
 function sanitized_pin() {
-  return filter_input(INPUT_POST, 'pin', FILTER_SANITIZE_NUMBER_INT);
+  return filter_input(INPUT_POST, 'pin', FILTER_VALIDATE_INT);
 }
 
 ?>

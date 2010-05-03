@@ -37,7 +37,7 @@ h2 {
 .login {
 	width: 400px;
 	height: 200px;
-	border: dashed #FCB040 4px;
+	border: dashed #EEEEFF 4px;
 	margin: 0px auto 0px auto;
 }
 
@@ -53,7 +53,7 @@ h2 {
 	margin-right: 20px;
 	display: block;
 	font-family: Arial, Helvetica, sans-serif;
-	color: #FFF;
+	color: #EEEEFF;
 }
 
 .login_input {
@@ -72,7 +72,8 @@ h2 {
 
 .login_fail {
 	margin-left: 95px;
-	color: #FF0000;
+	color: #FFBBBB;
+	line-height:3em;
 	font-family: Arial, Helvetica, sans-serif;
 	font-weight: bold;
 }
@@ -82,7 +83,7 @@ h2 {
 .registration {
 	width: 500px;
 	height: 350px;
-	border: dashed #FCB040 4px;
+	border: dashed #EEEEFF 4px;
 	margin: 0px auto 0px auto;
 }
 

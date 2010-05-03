@@ -34,7 +34,7 @@
 <link rel="stylesheet" type="text/css" media="all" href="../css/reset.css" />
 <link rel="stylesheet" type="text/css" media="all" href="../css/styles.css" />
 <link type="image/x-icon" rel="shortcut icon" href="../images/favicon.ico"/>
-<title>eWeek - Passport Login</title>
+<title>Discovering Research - Passport Login</title>
 </head>
 
 <body>
@@ -42,14 +42,14 @@
 <div id="wrapper">
 	<div id="header">
     	<div class="left">
-        	<img src="../images/eweek_logo.png" alt="eWeek 2010" border="0" />
+        	<img src="../images/eweek_logo.png" alt="Discovering Research" border="0" />
         </div>
         <div class="left">
         	<img src="../images/bg.png" alt="" border="0" />
         </div>
     </div>
     
-    <h1>eWeek Passport Login Page</h1>
+    <h1>Discovering Research Passport Login Page</h1>
     
     <br /><br /><br />
     <div class="login">
@@ -71,8 +71,8 @@
             <input type="text" name="bid" id="bid" value="<?PHP echo(isset($args["bid"]) ? $args["bid"] : ""); ?>" class="login_input" />
           </p>
           <br />
-          <p>
-            <label class="login_label"><strong>PIN:</strong></label>
+          <p style="display:none">
+            <label class="login_label"><strong>pin:</strong></label>
             <input type="text" name="pin" id="pin" value="<?PHP echo(isset($args["pin"]) ? $args["pin"] : ""); ?>" class="login_input" />
           </p>
           <br />

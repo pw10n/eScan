@@ -33,7 +33,7 @@
 <link rel="stylesheet" type="text/css" media="all" href="../css/reset.css" />
 <link rel="stylesheet" type="text/css" media="all" href="../css/styles.css" />
 <link type="image/x-icon" rel="shortcut icon" href="../images/favicon.ico"/>
-<title>eWeek Passport Statistics</title>
+<title>Passport Statistics</title>
 </head>
 
 <body>
@@ -48,7 +48,7 @@
         </div>
     </div>
 
-    <h1>eWeek Passport Statistics</h1>
+    <h1>Discovering Research Week Passport Statistics</h1>
 
     <br />
     
@@ -165,62 +165,6 @@
         }
         ?>
         
-        <br /><br />
-        <h2>Team Information</h2>
-        <br />
-        
-        <?PHP
-        if (!$is_registered_for_team) {
-        ?>
-        <p>
-        It looks like you are not registered for a team.  If you would like to start a team, click the "Register a Team" button.  If you are supposed to be on a team, please ask your team captain to add you to their team.
-        
-        <br /><br />
-        <form method="post" action="<?PHP echo($_SERVER["SCRIPT_NAME"]); ?>?state=team_registration">
-          <input type="submit" value="Register a Team" class="stats_submit" />
-          <input type="hidden" name="bid" value="<?PHP echo($args["bid"]); ?>" />
-          <input type="hidden" name="pin" value="<?PHP echo($args["pin"]); ?>" />
-        </form>
-        </p>
-        <?PHP
-        } else if ($is_team_captain) {
-        ?>
-        <p>
-        You are the team captain for your team.  Click the "Team Roster" button to view your team roster (including points by team member) and to add new members.
-        
-        <br /><br />
-        <form method="post" action="<?PHP echo($_SERVER["SCRIPT_NAME"]); ?>?state=team_registration">
-          <input type="submit" value="Team Roster" class="stats_submit" />
-          <input type="hidden" name="bid" value="<?PHP echo($args["bid"]); ?>" />
-          <input type="hidden" name="pin" value="<?PHP echo($args["pin"]); ?>" />
-        </form>
-        </p>
-        <?PHP
-        }
-        ?>
-        
-        <?PHP
-        if ($is_registered_for_team) {
-        ?>
-        
-        <br />
-        <p>
-          Here is some information about your team (<strong><?PHP echo($args["team"]["name"]); ?></strong>):<br>
-          You have earned <?PHP echo(isset($args["registration"]["pts"]) ? $args["registration"]["pts"] : 0); ?> point(s).<br>
-          Your team has earned a total of <?PHP echo(isset($args["team"]["pts"]) ? $args["team"]["pts"] : 0); ?> point(s).
-        </p>
-        <?PHP
-        }
-        ?>
-
-        <p>&nbsp;</p>
-        <p>
-          <ul>
-            <li><a href="http://esc.calpoly.edu/eweek" class="golink">eWeek Homepage</a></li>
-            <?PHP if ($is_registered_for_team) { ?><li><a href="controller.php?state=team_leaderboard" class="golink">Team Leaderboard</a></li> <?PHP } ?>
-          </ul>
-        </p>
-
 	</div>
 
 </div>

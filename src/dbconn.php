@@ -86,6 +86,12 @@ function get_event($eid){
    return $events_data[$eid];
 }
 
+function is_registered($bid) {
+  $con = get_mysql_connection();
+  $result = mysql_query("SELECT em as email FROM `users` WHERE `bid`=$bid", $con);
+  $row = mysql_fetch_assoc($result);
+  return strlen($row['email'] > 0);
+}
 // Adds an unregistered, teamless user to the database with the given barcode id
 // and pin.
 //
