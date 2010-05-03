@@ -98,7 +98,9 @@
  
         <div class="stats_note">
             <p>Hi <?PHP echo(isset($args["registration"]) ? $args["registration"]["fn"] : ""); ?>, you have attended <strong><?PHP echo($args["registration"]["evts"]); ?></strong> event(s).  
+            Each event you attend counts as an entry into the raffle for one of the three $10 Amazon Gift Cards we are giving away.
             
+            <?php /*
             <?PHP
             if ($eligible_for != NULL) {
             ?>
@@ -117,6 +119,8 @@
             
             <?PHP
             }
+            ?>
+            */
             ?>
             
             </p>
