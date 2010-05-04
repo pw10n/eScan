@@ -243,8 +243,10 @@ function validate_registration($registration) {
     $invalid_fields[] = "ln";
   }
 
-  if (!array_search($registration["ma"],
-                    array_map(extract_major_code, get_majors()))) {
+  // This is intentionally a "===" rather than "==".  See warning at:
+  // http://php.net/manual/en/function.array-search.php
+  if (array_search($registration["ma"],
+                   array_map(extract_major_code, get_majors())) === FALSE) {
 
     $invalid_fields[] = "ma";
   }
