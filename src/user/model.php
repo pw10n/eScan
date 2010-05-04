@@ -1,4 +1,3 @@
-<<<<<<< HEAD:src/user/model.php
 <?PHP
 /*
  *  Copyright (c) 2010 Cal Poly Engineering Student Council
@@ -1066,5 +1065,3 @@ function sanitized_pin() {
 }
 
 ?>
-
->>>>>>> 20609b8... Bug Fix Closes #47 - Fixed selection of first major.:src/user/model.php
