@@ -29,6 +29,21 @@ CREATE TABLE IF NOT EXISTS `events` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `event_scan_types`
+--
+
+DROP TABLE IF EXISTS `event_scan_types`;
+CREATE TABLE IF NOT EXISTS `event_scan_types` (
+  `estid` int(11) NOT NULL auto_increment COMMENT 'event scan type id',
+  `eid` int(11) NOT NULL COMMENT 'event id',
+  `estname` varchar(255) NOT NULL COMMENT 'event scan type name',
+  `pts` int(11) NOT NULL COMMENT 'points for the scan',
+  PRIMARY KEY  (`estid`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Table of extra scan types for events (other than plan attend' AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `log`
 --
 
