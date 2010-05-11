@@ -34,11 +34,23 @@ function init_database($dbname, $user, $pass){
 }
 
 // GENERATE .htaccess/.htpasswd FILES
-//    arguments: admin, password 
+//    arguments: system name, admin, password 
 //    precondition: none
 //    postcondition: htpasswd file with admin user is created and 
 //                   htaccess restricts access to admin folder
-function init_htfiles($user, $pass){
+function init_htfiles($name, $user, $pass){
+   $conf = $_SERVER['PHP_SELF'] + "/conf";   
+
+   exec("rm -f $conf/.htpasswd");
+   exec("htpasswd -c $conf/.htpasswd $user $pass"); 
+
+   $file = fopen("src/admin/.htaccess", 'w') or die("ERROR: Can not write .htaccess file");
+   fwrite($file, "AuthUserFile $conf/.htpasswd\n");
+   fwrite($file, "AuthGroupFile /dev/null\n");
+   fwrite($file, "AuthName \"$name\"\n");
+   fwrite($file, "AuthType Basic\n");
+   fwrite($file, "require valid-user\n");
+   fclose($file);
    
 }
 
