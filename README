@@ -7,6 +7,12 @@ Developed by:
    Brian Oppenheim <brianopp@gmail.com>
    Prentice Wongvibulsin <me@prenticew.com>
 
+Installation:
+   To install the eScan system:
+      1. Unpack the eScan package on your webserver.
+      2. Open http://(baseurl)/(path)/setup.php in your browser.
+      3. Follow on-screen instructions to setup database/initial admin user.
+
 License:
    eScan is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
