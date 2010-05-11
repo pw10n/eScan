@@ -54,6 +54,19 @@ CREATE TABLE IF NOT EXISTS `majors` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `prizes`
+--
+
+DROP TABLE IF EXISTS `prizes`;
+CREATE TABLE IF NOT EXISTS `prizes` (
+  `pid` int(11) NOT NULL auto_increment COMMENT 'prize id',
+  `pname` varchar(255) NOT NULL COMMENT 'prize name',
+  PRIMARY KEY  (`pid`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `score`
 --
 
