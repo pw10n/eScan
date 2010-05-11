@@ -16,6 +16,19 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `configuration`
+--
+
+DROP TABLE IF EXISTS `configuration`;
+CREATE TABLE IF NOT EXISTS `configuration` (
+  `name` varchar(50) NOT NULL COMMENT 'configuration variable name',
+  `value` text NOT NULL COMMENT 'configuration variable value',
+  PRIMARY KEY  (`name`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='eScan configuration options';
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `events`
 --
 
